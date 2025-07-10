@@ -16,6 +16,10 @@ func Init() {
 	CreateUserTable()
 }
 
+func close() {
+	db.DB.Close()
+}
+
 // CreateTokenTable creates the tokens table if it doesn't exist
 func CreateUserTable() {
 	createTableSQL := `
@@ -42,24 +46,28 @@ func CreateUserTable() {
 }
 
 // InsertTokenForUserID inserts a new token for a user
-func InsertUser(user user.RegistrationUser) {
+func InsertUser(user user.RegistrationUser) bool {
+	Init()
 	insertSQL := `INSERT INTO users (username, password, name, family, birthday, city, country) VALUES (?, ?, ?, ?, ?, ?, ?)`
 	statement, err := db.DB.Prepare(insertSQL)
 	if err != nil {
 		log.Fatalf("Error preparing insert statement: %v", err)
 	}
-	defer statement.Close()
+	defer close()
 
 	_, err = statement.Exec(user.Username, user.Password, user.Name, user.Family, user.Birthday, user.City, user.Country)
 	if err != nil {
 		log.Printf("Error inserting user for user %s: %v\n", user.Username, err)
-		return
+		return false
 	}
 	log.Printf("Inserted user %s\n", user.Username)
+	return true
 }
 
 // FetchTokenByUserID retrieves the token associated with a user_id
 func FetchUserByUserID(userID int) (*user.User, error) {
+	Init()
+	defer close()
 	var user user.User
 	err := db.DB.QueryRow("SELECT user_id, username, name, family, Birthday, city, country FROM users WHERE user_id = ?", userID).Scan(&user.UserID, &user.Username, &user.Name, &user.Family, &user.Birthday, &user.City, &user.Country)
 	if err != nil {
@@ -73,14 +81,15 @@ func FetchUserByUserID(userID int) (*user.User, error) {
 
 // FetchTokenByUserID retrieves the token associated with a user_id
 func FetchUserByUsername(username string) (*user.User, error) {
-	var storedUser user.StoredUser
-	err := db.DB.QueryRow("SELECT token FROM users WHERE username = ?", username).Scan(&storedUser)
+	Init()
+	defer close()
+	var user user.User
+	err := db.DB.QueryRow("SELECT user_id, username, name, family, Birthday, city, country FROM users WHERE username = ?", username).Scan(&user.UserID, &user.Username, &user.Name, &user.Family, &user.Birthday, &user.City, &user.Country)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("no token found for username %s", username)
 		}
 		return nil, fmt.Errorf("database error: %w", err)
 	}
-	userObject := storedUser.ConvertToUser()
-	return &userObject, nil
+	return &user, nil
 }
