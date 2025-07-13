@@ -16,10 +16,6 @@ func Init() {
 	CreateUserTable()
 }
 
-func close() {
-	db.DB.Close()
-}
-
 // CreateTokenTable creates the tokens table if it doesn't exist
 func CreateUserTable() {
 	createTableSQL := `
@@ -53,7 +49,7 @@ func InsertUser(user user.RegistrationUser) bool {
 	if err != nil {
 		log.Fatalf("Error preparing insert statement: %v", err)
 	}
-	defer close()
+	defer statement.Close()
 
 	_, err = statement.Exec(user.Username, user.Password, user.Name, user.Family, user.Birthday, user.City, user.Country)
 	if err != nil {
@@ -67,29 +63,44 @@ func InsertUser(user user.RegistrationUser) bool {
 // FetchTokenByUserID retrieves the token associated with a user_id
 func FetchUserByUserID(userID int) (*user.User, error) {
 	Init()
-	defer close()
 	var user user.User
 	err := db.DB.QueryRow("SELECT user_id, username, name, family, Birthday, city, country FROM users WHERE user_id = ?", userID).Scan(&user.UserID, &user.Username, &user.Name, &user.Family, &user.Birthday, &user.City, &user.Country)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("no token found for user_id %d", userID)
+			return nil, fmt.Errorf("no user found for user_id %d", userID)
 		}
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 	return &user, nil
 }
 
-// FetchTokenByUserID retrieves the token associated with a user_id
-func FetchUserByUsername(username string) (*user.User, error) {
+func FetchUserByUsername(username string) (*user.StoredUser, error) {
 	Init()
-	defer close()
-	var user user.User
-	err := db.DB.QueryRow("SELECT user_id, username, name, family, Birthday, city, country FROM users WHERE username = ?", username).Scan(&user.UserID, &user.Username, &user.Name, &user.Family, &user.Birthday, &user.City, &user.Country)
+	var user user.StoredUser
+	err := db.DB.QueryRow("SELECT user_id, name, family, Birthday, city, country, username, password FROM users WHERE username = ?", username).Scan(&user.UserID, &user.Name, &user.Family, &user.Birthday, &user.City, &user.Country, &user.Username, &user.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("no token found for username %s", username)
+			return nil, fmt.Errorf("no user found for user_id %s", username)
 		}
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 	return &user, nil
+}
+
+func UpdateUser(model user.UpdateUser, username string) bool {
+	Init()
+	updateSQL := `UPDATE users SET name = ?, family = ? WHERE username = ?`
+	statement, err := db.DB.Prepare(updateSQL)
+	if err != nil {
+		log.Fatalf("Error preparing update statement: %v", err)
+	}
+	defer statement.Close()
+
+	_, err = statement.Exec(model.Name, model.Family, username)
+	if err != nil {
+		log.Printf("Error Updateing user for user %s: %v\n", username, err)
+		return false
+	}
+	log.Printf("Updated user %s\n", username)
+	return true
 }

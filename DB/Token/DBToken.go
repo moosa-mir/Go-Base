@@ -20,8 +20,8 @@ func CreateTokenTable() {
 	createTableSQL := `
     CREATE TABLE IF NOT EXISTS tokens (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        token TEXT NOT NULL UNIQUE
+        user_id INTEGER NOT NULL UNIQUE,
+        token TEXT NOT NULL
     );`
 
 	statement, err := db.DB.Prepare(createTableSQL)
@@ -36,24 +36,28 @@ func CreateTokenTable() {
 }
 
 // InsertTokenForUserID inserts a new token for a user
-func InsertTokenForUserID(userID int, token string) {
-	insertSQL := `INSERT INTO tokens (user_id, token) VALUES (?, ?)`
+func InsertTokenForUserID(userID int, token string) bool {
+	Init()
+	insertSQL := `INSERT OR REPLACE INTO tokens (user_id, token) VALUES (?, ?)`
 	statement, err := db.DB.Prepare(insertSQL)
 	if err != nil {
 		log.Fatalf("Error preparing insert statement: %v", err)
+		return false
 	}
 	defer statement.Close()
 
 	_, err = statement.Exec(userID, token)
 	if err != nil {
 		log.Printf("Error inserting token for user %d: %v\n", userID, err)
-		return
+		return false
 	}
 	log.Printf("Inserted token for user %d\n", userID)
+	return true
 }
 
 // FetchTokenByUserID retrieves the token associated with a user_id
 func FetchTokenByUserID(userID int) (string, error) {
+	Init()
 	var token string
 	err := db.DB.QueryRow("SELECT token FROM tokens WHERE user_id = ?", userID).Scan(&token)
 	if err != nil {
@@ -68,6 +72,7 @@ func FetchTokenByUserID(userID int) (string, error) {
 
 // FetchUserIDOfToken gets the user_id associated with the given token
 func FetchUserIDOfToken(token string) (int, error) {
+	Init()
 	var userID int
 	err := db.DB.QueryRow("SELECT user_id FROM tokens WHERE token = ?", token).Scan(&userID)
 	if err != nil {
@@ -82,6 +87,7 @@ func FetchUserIDOfToken(token string) (int, error) {
 
 // IsTokenValid checks if a token exists
 func IsTokenValid(token string) bool {
+	Init()
 	var exists bool
 	err := db.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM tokens WHERE token = ?)", token).Scan(&exists)
 	if err != nil {

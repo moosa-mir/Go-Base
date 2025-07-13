@@ -78,3 +78,8 @@ func (u User) giveFullName() string {
 func (u *User) updateCity(newCity city) {
 	u.City = newCity
 }
+
+type UpdateUser struct {
+	Name   string `json:"name"`
+	Family string `json:"family"`
+}

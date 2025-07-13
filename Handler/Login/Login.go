@@ -2,6 +2,9 @@ package login
 
 import (
 	"encoding/json"
+	dbToken "myproject/DB/Token"
+	dbUser "myproject/DB/User"
+	token "myproject/Token"
 	"net/http"
 )
 
@@ -13,18 +16,13 @@ type LoginRequest struct {
 
 // Define a struct to represent the login response
 type TokenResponse struct {
-	Token string `json:"token"`
+	Token  string `json:"token"`
+	UserID int    `json:"user_id"`
 }
 
 type ErrorResponse struct {
 	Message   string `json:"message"`
 	ErrorCode int    `json:"errorCode"`
-}
-
-// Simulated database of users (for demonstration purposes)
-var validUser = LoginRequest{
-	Username: "admin",
-	Password: "password123",
 }
 
 // LoginHandler handles the login logic
@@ -44,21 +42,29 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate the credentials
-	if loginReq.Username == validUser.Username && loginReq.Password == validUser.Password {
-		// Successful login
-		response := TokenResponse{
-			Token: "hdfjkgjkdfghi35jkhrgjndjdhgfjhdjfkgh34593405inasqweqwe823lkjk",
-		}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
-	} else {
-		// Failed login
-		response := ErrorResponse{
-			Message:   "Invalid username or password",
-			ErrorCode: 401,
-		}
-		w.WriteHeader(http.StatusUnauthorized) // 401 Unauthorized
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
+	userOnDB, error := dbUser.FetchUserByUsername(loginReq.Username)
+	if userOnDB == nil || error != nil {
+		http.Error(w, "Invalid data", http.StatusUnauthorized)
+		return
 	}
+
+	newToken, error := token.GenerateToken(userOnDB.UserID, userOnDB.Username)
+	if newToken == "" || error != nil {
+		http.Error(w, "Internal Error Generate Token", http.StatusConflict)
+		return
+	}
+
+	result := dbToken.InsertTokenForUserID(userOnDB.UserID, newToken)
+	if !result {
+		http.Error(w, "Internal Error Insert Token", http.StatusConflict)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	response := TokenResponse{
+		Token:  newToken,
+		UserID: userOnDB.UserID,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
