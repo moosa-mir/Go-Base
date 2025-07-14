@@ -4,7 +4,6 @@ import (
 	json "encoding/json"
 	"fmt"
 	dbUser "myproject/DB/User"
-	token "myproject/Token"
 	http "net/http"
 	"strconv"
 	"strings"
@@ -23,13 +22,6 @@ func AccountInfoHandler(w http.ResponseWriter, r *http.Request) {
 	if error != nil {
 		fmt.Println("No account ID found")
 		http.Error(w, "Invalid URL path", http.StatusBadRequest)
-		return
-	}
-
-	isTokenValid, error := token.CheckToken(r, accountID)
-	if !isTokenValid {
-		fmt.Println(error)
-		http.Error(w, "User invalid", http.StatusUnauthorized)
 		return
 	}
 
