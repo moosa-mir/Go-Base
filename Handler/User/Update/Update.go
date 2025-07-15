@@ -3,12 +3,20 @@ package update
 import (
 	"encoding/json"
 	"fmt"
-	dbUser "myproject/DB/User"
+	db "myproject/DB"
 	user "myproject/User"
 	"net/http"
 )
 
-func UpdateHandler(w http.ResponseWriter, r *http.Request) {
+type UpdateApi struct {
+	DB *db.DB
+}
+
+func ApiHandler(db *db.DB) *UpdateApi {
+	return &UpdateApi{DB: db}
+}
+
+func (db *UpdateApi) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPatch {
 		http.Error(w, "Method not support", http.StatusMethodNotAllowed)
 		return
@@ -29,14 +37,14 @@ func UpdateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userOnDB, errorFetch := dbUser.FetchUserByUsername(userName)
+	userOnDB, errorFetch := db.DB.FetchUserByUsername(userName)
 	if userOnDB == nil || errorFetch != nil {
 		fmt.Println(errorFetch)
 		http.Error(w, "username is not valid on db", http.StatusBadRequest)
 		return
 	}
 
-	result := dbUser.UpdateUser(updateModel, userName)
+	result, _ := db.DB.UpdateUser(updateModel, userName)
 	if !result {
 		http.Error(w, "Internal error", http.StatusConflict)
 		return

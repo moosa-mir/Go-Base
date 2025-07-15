@@ -3,12 +3,23 @@ package register
 import (
 	json "encoding/json"
 	"fmt"
+	db "myproject/DB"
 	dbUser "myproject/DB/User"
 	user "myproject/User"
 	http "net/http"
 )
 
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+type RegisterApi struct {
+	DB *db.DB
+}
+
+func ApiHandler(db *db.DB) *RegisterApi {
+	return &RegisterApi{DB: db}
+}
+
+func (db *RegisterApi) RegisterHandler(w http.ResponseWriter, r *http.Request) {
+
+	// func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	// Ensure the request method is Get
 	fmt.Println("RegisterHandler")
 	if r.Method != http.MethodPost {
@@ -24,13 +35,13 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userOnDB, error := dbUser.FetchUserByUsername(registerModel.Username)
+	userOnDB, error := db.DB.FetchUserByUsername(registerModel.Username)
 	if error == nil || userOnDB != nil {
 		http.Error(w, "username exist", http.StatusConflict)
 		return
 	}
 	dbUser.Init()
-	result := dbUser.InsertUser(registerModel)
+	result, _ := db.DB.InsertUser(registerModel)
 	if result {
 		w.WriteHeader(http.StatusCreated)
 		fmt.Fprintf(w, `{"message": "User registered successfully"}`)

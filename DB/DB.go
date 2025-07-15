@@ -1,27 +1,154 @@
+// package db
+
+// import (
+// 	sql "database/sql"
+// 	"log"
+// 	constant "myproject/Constant"
+
+// 	_ "github.com/mattn/go-sqlite3"
+// )
+
+// var DB *sql.DB
+
+// Init initializes the database connection and creates the tokens table if not exists
+// func Init() {
+// 	var err error
+// 	DB, err = sql.Open("sqlite3", constant.DataSource)
+// 	if err != nil {
+// 		log.Fatalf("Error opening database: %v", err)
+// 	}
+
+// 	err = DB.Ping()
+// 	if err != nil {
+// 		log.Fatalf("Error pinging database: %v", err)
+// 	}
+
+// 	log.Println("Connected to SQLite database")
+// }
+
 package db
 
 import (
-	sql "database/sql"
+	"context"
+	"database/sql"
+	"fmt"
 	"log"
 	constant "myproject/Constant"
+	user "myproject/User"
+	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq" // PostgreSQL driver
+	"golang.org/x/crypto/bcrypt"
 )
 
-var DB *sql.DB
+type DB struct {
+	*sql.DB
+}
 
-// Init initializes the database connection and creates the tokens table if not exists
-func Init() {
-	var err error
-	DB, err = sql.Open("sqlite3", constant.DataSource)
+func ConnectDB() (*DB, error) {
+	db, err := sql.Open("postgres", constant.ConnStr)
 	if err != nil {
-		log.Fatalf("Error opening database: %v", err)
+		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	err = DB.Ping()
-	if err != nil {
-		log.Fatalf("Error pinging database: %v", err)
+	// Test the connection
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	log.Println("Connected to SQLite database")
+	log.Println("Connected to the database!")
+	return &DB{db}, nil
+}
+
+func (db *DB) FetchUserByUsername(username string) (*user.StoredUser, error) {
+	query := `SELECT username, name, family, birthday, city, country, phone FROM users WHERE username = $1`
+	row := db.QueryRow(query, username)
+
+	var user user.StoredUser
+	if err := row.Scan(&user.Username, &user.Name, &user.Family, &user.Birthday, &user.City, &user.Country, &user.Phone); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user with username %s not found", username)
+		}
+		return nil, fmt.Errorf("failed to fetch user: %w", err)
+	}
+
+	log.Printf("Fetched user: %+v\n", user)
+	return &user, nil
+}
+
+// InsertUser inserts a new user into the database.
+func (db *DB) InsertUser(user user.RegistrationUser) (bool, error) {
+	// Hash the password before storing it in the database
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Printf("Error hashing password for user %s: %v\n", user.Username, err)
+		return false, err
+	}
+
+	// Define the SQL query with PostgreSQL placeholders ($1, $2, ...)
+	insertSQL := `
+        INSERT INTO users (username, password, name, family, birthday, city, country, phone)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `
+
+	// Prepare the statement
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	statement, err := db.DB.PrepareContext(ctx, insertSQL)
+	if err != nil {
+		log.Printf("Error preparing insert statement: %v", err)
+		return false, err
+	}
+	defer statement.Close()
+
+	// Execute the statement with the hashed password and other user details
+	_, err = statement.ExecContext(
+		ctx,
+		user.Username,
+		string(hashedPassword), // Store the hashed password
+		user.Name,
+		user.Family,
+		user.Birthday,
+		user.City,
+		user.Country,
+		user.Phone,
+	)
+	if err != nil {
+		log.Printf("Error inserting user for user %s: %v\n", user.Username, err)
+		return false, err
+	}
+
+	log.Printf("Inserted user %s\n", user.Username)
+	return true, nil
+}
+
+func (db *DB) UpdateUser(model user.UpdateUser, username string) (bool, error) {
+	// Define the SQL query with PostgreSQL placeholders ($1, $2, ...)
+	updateSQL := `
+        UPDATE users 
+        SET name = $1, family = $2 
+        WHERE username = $3
+    `
+
+	// Prepare the statement with context
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	statement, err := db.DB.PrepareContext(ctx, updateSQL)
+	if err != nil {
+		log.Printf("Error preparing update statement: %v", err)
+		return false, err
+	}
+	defer statement.Close()
+
+	// Execute the statement with the provided values
+	_, err = statement.ExecContext(ctx, model.Name, model.Family, username)
+	if err != nil {
+		log.Printf("Error updating user for user %s: %v\n", username, err)
+		return false, err
+	}
+
+	log.Printf("Updated user %s\n", username)
+	return true, nil
 }

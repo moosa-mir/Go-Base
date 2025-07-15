@@ -8,12 +8,12 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateToken(userID int, name string) (string, error) {
+func GenerateToken(username string, phone string) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour) // Token expires in 24 hours
 
 	claims := &auth.Claims{
-		UserID: userID,
-		Name:   name,
+		Username: username,
+		Phone:    phone,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

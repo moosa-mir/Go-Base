@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	auth "myproject/Auth"
-	db "myproject/DB/Init"
+	db "myproject/DB"
 	product "myproject/Handler/Product/List"
 	account "myproject/Handler/User/AccountInfo"
 	login "myproject/Handler/User/Login"
@@ -16,14 +16,17 @@ import (
 // RegisterRoutes registers the login route with the HTTP server
 func RegisterRoutes(db *db.DB) {
 	mux := http.NewServeMux()
-	loginApiHandler := login.LoginApiHandler(db)
+	loginApi := login.ApiHandler(db)
+	registerApi := register.ApiHandler(db)
+	accountApi := account.ApiHandler(db)
+	updateApi := update.ApiHandler(db)
 
 	// mux.HandleFunc("/login", login.LoginHandler)
-	mux.HandleFunc("/login", loginApiHandler.LoginHandler)
-	mux.HandleFunc("/register", register.RegisterHandler)
+	mux.HandleFunc("/login", loginApi.LoginHandler)
+	mux.HandleFunc("/register", registerApi.RegisterHandler)
 	mux.HandleFunc("/product/", product.HandleProductList)
-	mux.HandleFunc("/accountInfo/", auth.AuthMiddleware(account.AccountInfoHandler))
-	mux.HandleFunc("/update", auth.AuthMiddleware(update.UpdateHandler))
+	mux.HandleFunc("/accountInfo/", auth.AuthMiddleware(accountApi.AccountInfoHandler))
+	mux.HandleFunc("/update", auth.AuthMiddleware(updateApi.UpdateHandler))
 
 	// Start the HTTP server on port 8080
 	fmt.Println("Starting server on :8080...")
