@@ -4,9 +4,8 @@ import (
 	json "encoding/json"
 	"fmt"
 	dbUser "myproject/DB/User"
+	utils "myproject/Utils"
 	http "net/http"
-	"strconv"
-	"strings"
 )
 
 func AccountInfoHandler(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +17,7 @@ func AccountInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extract the path parameter "id"
-	accountID, error := getAccountID(r)
+	accountID, error := utils.GetPathInt(r, 2)
 	if error != nil {
 		fmt.Println("No account ID found")
 		http.Error(w, "Invalid URL path", http.StatusBadRequest)
@@ -35,23 +34,4 @@ func AccountInfoHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("account ID is", accountID)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
-}
-
-func getAccountID(r *http.Request) (int, error) {
-	// Extract the path parameter manually
-	path := r.URL.Path
-	fmt.Println("path is ", path)
-	parts := strings.Split(path, "/") // Split the path into parts
-	if len(parts) != 3 {
-		return 0, fmt.Errorf("invalid URL")
-	}
-
-	accountIDStr := parts[2] // Extract the "id" from the path
-	// Convert the account ID to an integer
-	accountID, err := strconv.Atoi(accountIDStr)
-	fmt.Println("string account id is ", accountIDStr)
-	if err != nil {
-		return 0, fmt.Errorf("invalid URL")
-	}
-	return accountID, nil
 }

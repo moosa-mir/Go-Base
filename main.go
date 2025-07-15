@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+	db "myproject/DB/Init"
 	registerRoute "myproject/RegisterRoute"
 )
 
@@ -16,6 +18,13 @@ func main() {
 	// 	dbToken.InsertTokenForUserID(2, "hdfjkgjkdfghi35jkhrgjndjdhgfjhdjfkgh34593405inasqweqwe823lkjk")
 	// }
 
-	registerRoute.RegisterRoutes()
+	// Connect to the database
+	database, err := db.ConnectDB()
+	if err != nil {
+		log.Fatalf("Failed to connect to the database: %v", err)
+	}
+	defer database.Close()
+
+	registerRoute.RegisterRoutes(database)
 
 }
