@@ -4,7 +4,6 @@ import (
 	json "encoding/json"
 	"fmt"
 	db "myproject/DB"
-	dbUser "myproject/DB/User"
 	user "myproject/User"
 	http "net/http"
 )
@@ -40,7 +39,7 @@ func (db *RegisterApi) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "username exist", http.StatusConflict)
 		return
 	}
-	dbUser.Init()
+
 	result, _ := db.DB.InsertUser(registerModel)
 	if result {
 		w.WriteHeader(http.StatusCreated)
