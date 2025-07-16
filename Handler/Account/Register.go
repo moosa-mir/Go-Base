@@ -1,22 +1,13 @@
-package register
+package account
 
 import (
 	json "encoding/json"
 	"fmt"
-	db "myproject/DB"
 	user "myproject/User"
 	http "net/http"
 )
 
-type RegisterApi struct {
-	DB *db.DB
-}
-
-func ApiHandler(db *db.DB) *RegisterApi {
-	return &RegisterApi{DB: db}
-}
-
-func (db *RegisterApi) RegisterHandler(w http.ResponseWriter, r *http.Request) {
+func (db *AccountApi) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	// func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	// Ensure the request method is Get

@@ -1,4 +1,4 @@
-package update
+package account
 
 import (
 	"encoding/json"
@@ -8,15 +8,15 @@ import (
 	"net/http"
 )
 
-type UpdateApi struct {
+type AccountApi struct {
 	DB *db.DB
 }
 
-func ApiHandler(db *db.DB) *UpdateApi {
-	return &UpdateApi{DB: db}
+func ApiHandler(db *db.DB) *AccountApi {
+	return &AccountApi{DB: db}
 }
 
-func (db *UpdateApi) UpdateHandler(w http.ResponseWriter, r *http.Request) {
+func (db *AccountApi) UpdateHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPatch {
 		http.Error(w, "Method not support", http.StatusMethodNotAllowed)
 		return

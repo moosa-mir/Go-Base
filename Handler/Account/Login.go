@@ -1,9 +1,8 @@
-package login
+package account
 
 import (
 	"encoding/json"
 	"fmt"
-	db "myproject/DB"
 	token "myproject/Token"
 	"net/http"
 )
@@ -24,15 +23,7 @@ type ErrorResponse struct {
 	ErrorCode int    `json:"errorCode"`
 }
 
-type LoginApi struct {
-	DB *db.DB
-}
-
-func ApiHandler(db *db.DB) *LoginApi {
-	return &LoginApi{DB: db}
-}
-
-func (db *LoginApi) LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (db *AccountApi) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Ensure the request method is POST
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)

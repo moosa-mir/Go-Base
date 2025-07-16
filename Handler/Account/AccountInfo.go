@@ -1,21 +1,12 @@
-package accountinfo
+package account
 
 import (
 	json "encoding/json"
 	"fmt"
-	db "myproject/DB"
 	token "myproject/Token"
 	utils "myproject/Utils"
 	http "net/http"
 )
-
-type AccountApi struct {
-	DB *db.DB
-}
-
-func ApiHandler(db *db.DB) *AccountApi {
-	return &AccountApi{DB: db}
-}
 
 func (db *AccountApi) AccountInfoHandler(w http.ResponseWriter, r *http.Request) {
 	// Ensure the request method is Get

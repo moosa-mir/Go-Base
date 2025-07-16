@@ -5,28 +5,24 @@ import (
 	"log"
 	auth "myproject/Auth"
 	db "myproject/DB"
-	product "myproject/Handler/Product/List"
-	account "myproject/Handler/User/AccountInfo"
-	login "myproject/Handler/User/Login"
-	register "myproject/Handler/User/Register"
-	update "myproject/Handler/User/Update"
+	account "myproject/Handler/Account"
+	product "myproject/Handler/Product"
 	"net/http"
 )
 
 // RegisterRoutes registers the login route with the HTTP server
 func RegisterRoutes(db *db.DB) {
 	mux := http.NewServeMux()
-	loginApi := login.ApiHandler(db)
-	registerApi := register.ApiHandler(db)
 	accountApi := account.ApiHandler(db)
-	updateApi := update.ApiHandler(db)
+	productApi := product.ApiHandler(db)
 
 	// mux.HandleFunc("/login", login.LoginHandler)
-	mux.HandleFunc("/login", loginApi.LoginHandler)
-	mux.HandleFunc("/register", registerApi.RegisterHandler)
-	mux.HandleFunc("/product/", product.HandleProductList)
+	mux.HandleFunc("/login", accountApi.LoginHandler)
+	mux.HandleFunc("/register", accountApi.RegisterHandler)
+	mux.HandleFunc("/product", productApi.HandleProductList)
+	mux.HandleFunc("/product/{id}", productApi.HandleProductItem)
 	mux.HandleFunc("/accountInfo/", auth.AuthMiddleware(accountApi.AccountInfoHandler))
-	mux.HandleFunc("/update", auth.AuthMiddleware(updateApi.UpdateHandler))
+	mux.HandleFunc("/update", auth.AuthMiddleware(accountApi.UpdateHandler))
 
 	// Start the HTTP server on port 8080
 	fmt.Println("Starting server on :8080...")
