@@ -14,5 +14,4 @@ func main() {
 	defer database.Close()
 
 	registerRoute.RegisterRoutes(database)
-
 }

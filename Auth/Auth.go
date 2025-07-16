@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	constant "myproject/Constant"
+	token "myproject/Token"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -16,30 +17,9 @@ const (
 	ClaimsKey contextKey = "claims"
 )
 
-type Claims struct {
-	Phone    string `json:"phone"`
-	Username string `json:"username"`
-	jwt.RegisteredClaims
-}
-
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "Missing authorization header", http.StatusUnauthorized)
-			return
-		}
-
-		tokenString := authHeader // assuming format: Bearer <token>
-		if tokenString == "Bearer " {
-			http.Error(w, "Invalid or missing token", http.StatusUnauthorized)
-			return
-		}
-
-		// Remove "Bearer " prefix if needed
-		if len(tokenString) > 7 && tokenString[:7] == "Bearer " {
-			tokenString = tokenString[7:]
-		}
+		tokenString := token.FetchToken(r)
 
 		// Parse and validate the token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {

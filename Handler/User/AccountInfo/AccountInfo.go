@@ -4,6 +4,7 @@ import (
 	json "encoding/json"
 	"fmt"
 	db "myproject/DB"
+	token "myproject/Token"
 	utils "myproject/Utils"
 	http "net/http"
 )
@@ -39,6 +40,11 @@ func (db *AccountApi) AccountInfoHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	usernameOnToken, _ := token.FetchUsernameFromToken(r)
+	if usernameOnToken != username {
+		http.Error(w, "Invalid Account", http.StatusBadRequest)
+		return
+	}
 	result := user.ConvertToUser()
 	fmt.Println("username is", username)
 	w.Header().Set("Content-Type", "application/json")
