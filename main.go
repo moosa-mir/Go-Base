@@ -1,17 +1,7 @@
 package main
 
-import (
-	"log"
-	db "myproject/DB"
-	registerRoute "myproject/RegisterRoute"
-)
+import cmd "myproject/cmd"
 
 func main() {
-	database, err := db.ConnectDB()
-	if err != nil {
-		log.Fatalf("Failed to connect to the database: %v", err)
-	}
-	defer database.Close()
-
-	registerRoute.RegisterRoutes(database)
+	cmd.Execute()
 }
