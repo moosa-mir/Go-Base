@@ -8,10 +8,13 @@ type StoredWalletItem struct {
 }
 
 type InsertWalletItem struct {
-	ProductID int    `json:"product_id"`
-	Username  int    `json:"username"`
-	Date      string `json:"date"`
-	Count     int    `json:"count"`
+	ProductID int     `json:"product_id"`
+	Date      float32 `json:"date"`
+	Count     int     `json:"count"`
+}
+
+type InputAddWalletItem struct {
+	ProductID int `json:"product_id"`
 }
 
 type WalletItem struct {

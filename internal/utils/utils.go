@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // GetPathParam extracts a path part by index
@@ -40,4 +41,16 @@ func GetPathInt(r *http.Request, index int) (int, error) {
 // GetPathString returns a string from path
 func GetPathString(r *http.Request, index int) (string, error) {
 	return getPathParam(r, index)
+}
+
+// GenerateTimeIntervalFromEpoch calculates the time interval (in seconds) between now and the Unix epoch.
+func GenerateTimeIntervalFromEpoch() float32 {
+	// Define the Unix epoch (1970-01-01 00:00:00 UTC)
+	epoch := time.Unix(0, 0)
+
+	// Calculate the duration between now and the Unix epoch
+	duration := time.Since(epoch) // Returns a time.Duration
+
+	// Convert the duration to seconds and return as a float32
+	return float32(duration.Seconds())
 }

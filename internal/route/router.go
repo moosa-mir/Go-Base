@@ -2,6 +2,7 @@ package route
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
 	"log"
 	"myproject/internal/auth"
 	"myproject/internal/db"
@@ -13,21 +14,22 @@ import (
 
 // RegisterRoutes registers the login route with the HTTP server
 func RegisterRoutes(db *db.DB) {
-	mux := http.NewServeMux()
+	router := mux.NewRouter()
 	accountApi := account.ApiHandler(db)
 	productApi := product.ApiHandler(db)
 	walletApi := wallet.ApiHandler(db)
 
 	// mux.HandleFunc("/login", login.LoginHandler)
-	mux.HandleFunc("/login", accountApi.LoginHandler)
-	mux.HandleFunc("/register", accountApi.RegisterHandler)
-	mux.HandleFunc("/product", productApi.HandleProductList)
-	mux.HandleFunc("/wallet", walletApi.HandleWalletItems)
-	mux.HandleFunc("/product/{id}", productApi.HandleProductItem)
-	mux.HandleFunc("/accountInfo/", auth.AuthMiddleware(accountApi.AccountInfoHandler))
-	mux.HandleFunc("/update", auth.AuthMiddleware(accountApi.UpdateHandler))
+	router.HandleFunc("/login", accountApi.LoginHandler).Methods(http.MethodPost)
+	router.HandleFunc("/register", accountApi.RegisterHandler).Methods(http.MethodPost)
+	router.HandleFunc("/product", productApi.HandleProductList).Methods(http.MethodGet)
+	router.HandleFunc("/wallet", walletApi.HandleWalletItems).Methods(http.MethodGet)
+	router.HandleFunc("/wallet", walletApi.HandleAddItem).Methods(http.MethodPost)
+	router.HandleFunc("/product/{id}", productApi.HandleProductItem).Methods(http.MethodGet)
+	router.HandleFunc("/accountInfo/", auth.AuthMiddleware(accountApi.AccountInfoHandler)).Methods(http.MethodGet)
+	router.HandleFunc("/update", auth.AuthMiddleware(accountApi.UpdateHandler)).Methods(http.MethodPatch)
 
 	// Start the HTTP server on port 8080
 	fmt.Println("Starting server on :8080...")
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
