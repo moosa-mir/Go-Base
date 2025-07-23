@@ -2,21 +2,28 @@ package wallet
 
 import (
 	"encoding/json"
-	token "myproject/internal/auth"
+	"myproject/internal/auth"
+	"myproject/internal/model"
 	"net/http"
 )
 
-func (db *Api) HandleWalletItems(w http.ResponseWriter, r *http.Request) {
-	username, errorUsername := token.FetchUsernameFromToken(r)
-	if username == "" || errorUsername != nil {
-		http.Error(w, "User name is not valid", http.StatusConflict)
+func (db *Api) HandleWallet(w http.ResponseWriter, r *http.Request) {
+	userID, err := auth.FetchUserIDFromToken(r)
+	if err != nil || userID == nil {
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	items, err := db.DB.FetchWalletByUsername(username)
+
+	walletModel, err := db.DB.FetchWalletByUsername(*userID)
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusConflict)
+		http.Error(w, "User not found", http.StatusUnauthorized)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(items)
+
+	if walletModel == nil {
+		_ = json.NewEncoder(w).Encode(model.WalletModel{})
+		return
+	}
+	_ = json.NewEncoder(w).Encode(walletModel)
+	w.WriteHeader(http.StatusOK)
 }

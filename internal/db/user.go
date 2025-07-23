@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"log"
 	user "myproject/internal/model"
 	"time"
@@ -12,12 +13,28 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func (db *DB) FetchUserByUserID(userID uuid.UUID) (*user.StoredUser, error) {
+	query := `SELECT id, username, name, family, birthday, city, country, phone FROM users WHERE id = $1`
+	row := db.QueryRow(query, userID)
+
+	var model user.StoredUser
+	if err := row.Scan(&model.ID, &model.Username, &model.Name, &model.Family, &model.Birthday, &model.City, &model.Country, &model.Phone); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("user with username %s not found", userID)
+		}
+		return nil, fmt.Errorf("failed to fetch user: %w", err)
+	}
+
+	log.Printf("Fetched user: %+v\n", model)
+	return &model, nil
+}
+
 func (db *DB) FetchUserByUsername(username string) (*user.StoredUser, error) {
-	query := `SELECT username, name, family, birthday, city, country, phone FROM users WHERE username = $1`
+	query := `SELECT id, username, name, family, birthday, city, country, phone FROM users WHERE id = $1`
 	row := db.QueryRow(query, username)
 
 	var model user.StoredUser
-	if err := row.Scan(&model.Username, &model.Name, &model.Family, &model.Birthday, &model.City, &model.Country, &model.Phone); err != nil {
+	if err := row.Scan(&model.ID, &model.Username, &model.Name, &model.Family, &model.Birthday, &model.City, &model.Country, &model.Phone); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("user with username %s not found", username)
 		}
@@ -75,7 +92,7 @@ func (db *DB) InsertUser(user user.RegistrationUser) (bool, error) {
 	return true, nil
 }
 
-func (db *DB) UpdateUser(model user.UpdateUser, username string) (bool, error) {
+func (db *DB) UpdateUser(model user.UpdateUser, userID uuid.UUID) (bool, error) {
 	// Define the SQL query with PostgreSQL placeholders ($1, $2, ...)
 	updateSQL := `
         UPDATE users 
@@ -95,12 +112,12 @@ func (db *DB) UpdateUser(model user.UpdateUser, username string) (bool, error) {
 	defer statement.Close()
 
 	// Execute the statement with the provided values
-	_, err = statement.ExecContext(ctx, model.Name, model.Family, username)
+	_, err = statement.ExecContext(ctx, model.Name, model.Family, userID)
 	if err != nil {
-		log.Printf("Error updating user for user %s: %v\n", username, err)
+		log.Printf("Error updating user for user %s: %v\n", userID, err)
 		return false, err
 	}
 
-	log.Printf("Updated user %s\n", username)
+	log.Printf("Updated user %s\n", userID)
 	return true, nil
 }

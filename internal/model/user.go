@@ -1,5 +1,7 @@
 package model
 
+import "github.com/google/uuid"
+
 type User struct {
 	Username string  `json:"username"`
 	Name     string  `json:"name"`
@@ -28,17 +30,18 @@ const (
 
 // ////////////////
 type StoredUser struct {
-	Username string  `json:"username"`
-	Password string  `json:"password"`
-	Name     string  `json:"name"`
-	Family   string  `json:"family"`
-	Birthday int     `json:"birthday"`
-	City     city    `json:"city"`
-	Country  country `json:"country"`
-	Phone    country `json:"phone"`
+	ID       uuid.UUID `json:"id"`
+	Username string    `json:"username"`
+	Password string    `json:"password"`
+	Name     string    `json:"name"`
+	Family   string    `json:"family"`
+	Birthday int       `json:"birthday"`
+	City     city      `json:"city"`
+	Country  country   `json:"country"`
+	Phone    country   `json:"phone"`
 }
 
-type UserStoredExtention interface {
+type UserStored interface {
 	convertToUse() User
 }
 
@@ -47,7 +50,6 @@ func (u StoredUser) ConvertToUser() User {
 	return user
 }
 
-// ///////////////////////////////
 type RegistrationUser struct {
 	Username string  `json:"username"`
 	Password string  `json:"password"`
@@ -57,27 +59,6 @@ type RegistrationUser struct {
 	City     city    `json:"city"`
 	Country  country `json:"country"`
 	Phone    country `json:"phone"`
-}
-
-// ///////////////////////////////
-type UserExtention interface {
-	calculateAge() int
-	giveFullName() string
-	updateCity(newCity city)
-}
-
-// Implement calculateAge
-func (u User) calculateAge() int {
-	return 2023 - u.Birthday
-}
-
-// Implement giveFullName
-func (u User) giveFullName() string {
-	return u.Name + " " + u.Family
-}
-
-func (u *User) updateCity(newCity city) {
-	u.City = newCity
 }
 
 type UpdateUser struct {

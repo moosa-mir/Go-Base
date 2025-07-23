@@ -39,16 +39,16 @@ func (db *Api) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate the credentials
-	userOnDB, error := db.DB.FetchUserByUsername(loginReq.Username)
+	userOnDB, errDB := db.DB.FetchUserByUsername(loginReq.Username)
 	// userOnDB, error := dbUser.FetchUserByUsername(loginReq.Username)
-	if userOnDB == nil || error != nil {
+	if userOnDB == nil || errDB != nil {
 		fmt.Println("user is not valid ", loginReq)
 		http.Error(w, "Invalid data", http.StatusUnauthorized)
 		return
 	}
 
-	newToken, error := token.GenerateToken(userOnDB.Username, string(userOnDB.Phone))
-	if newToken == "" || error != nil {
+	newToken, err := token.GenerateToken(userOnDB.Username, userOnDB.ID)
+	if newToken == "" || err != nil {
 		http.Error(w, "Internal Error Generate Token", http.StatusConflict)
 		return
 	}
@@ -58,5 +58,5 @@ func (db *Api) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Token: newToken,
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }

@@ -1,25 +1,27 @@
 package auth
 
 import (
+	"github.com/google/uuid"
 	"myproject/internal/constant"
 	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	_ "github.com/google/uuid"
 )
 
 type Claims struct {
-	Phone    string `json:"phone"`
-	Username string `json:"username"`
+	ID       uuid.UUID `json:"id"`
+	Username string    `json:"username"`
 	jwt.RegisteredClaims
 }
 
-func GenerateToken(username string, phone string) (string, error) {
+func GenerateToken(username string, id uuid.UUID) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour) // Token expires in 24 hours
 
 	claims := &Claims{
 		Username: username,
-		Phone:    phone,
+		ID:       id,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -37,7 +39,7 @@ func GenerateToken(username string, phone string) (string, error) {
 	return tokenString, nil
 }
 
-func FetchUsernameFromToken(r *http.Request) (string, error) {
+func FetchUserIDFromToken(r *http.Request) (*uuid.UUID, error) {
 	tokenString := FetchToken(r)
 	// Parse the token with the secret key
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
@@ -51,17 +53,17 @@ func FetchUsernameFromToken(r *http.Request) (string, error) {
 
 	if err != nil {
 		// Handle token parsing errors (e.g., invalid token, expired token)
-		return "", err
+		return nil, err
 	}
 
 	// Check if the token is valid and has claims
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 		// Extract and return the username from the claims
-		return claims.Username, nil
+		return &claims.ID, nil
 	}
 
 	// If the token is invalid or claims are missing
-	return "", jwt.ErrInvalidKey
+	return nil, jwt.ErrInvalidKey
 }
 
 func FetchToken(r *http.Request) string {

@@ -1,6 +1,8 @@
-package wallet
+package basket
 
-import "myproject/internal/db"
+import (
+	"myproject/internal/db"
+)
 
 type Api struct {
 	DB *db.DB

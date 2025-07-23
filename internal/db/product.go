@@ -49,7 +49,7 @@ func (db *DB) FetchProducts() ([]product.Product, error) {
 }
 
 // FetchProducts fetches a list of products from the database.
-func (db *DB) FetchProduct(productID int) (*product.Product, error) {
+func (db *DB) FetchProduct(productID string) (*product.Product, error) {
 	query := `SELECT id, name, description, price, image FROM products WHERE id = $1`
 	row := db.QueryRow(query, productID)
 
