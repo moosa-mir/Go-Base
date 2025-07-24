@@ -25,14 +25,28 @@ func (db *Payment) PayHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Wallet not found", http.StatusNotFound)
 		return
 	}
-	getBasketPrice(basket)
+	totalPrice := getBasketPrice(basket)
+	fmt.Println("totalPrice of basket is", totalPrice)
+	if wallet.Balance < totalPrice {
+		http.Error(w, "Not enough balance", http.StatusBadRequest)
+		return
+	}
+
+	errorMoveToDB := db.DB.ProcessPayment(*userID, basket, totalPrice)
+	if errorMoveToDB != nil {
+		http.Error(w, errorMoveToDB.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 	return
 }
 
 func getBasketPrice(basket []model.BasketItem) float32 {
+	var totalPrice float32 = 0
 	for _, item := range basket {
-		fmt.Println(item)
+		totalPrice += item.Product.Price * float32(item.Count)
 	}
 
-	return 0
+	return totalPrice
 }

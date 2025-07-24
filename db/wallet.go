@@ -44,3 +44,22 @@ func (db *DB) IncreaseWallet(balance float32, userID uuid.UUID) error {
 	fmt.Printf("Increased wallet balance for user_id %s by %.2f\n", userID, balance)
 	return nil
 }
+
+func (db *DB) UpdateWalletBalance(tx *sql.Tx, userID uuid.UUID, newBalance float32) error {
+	query := `
+        UPDATE wallet 
+        SET balance = balance + $1 
+        WHERE user_id = $2
+    `
+	result, err := tx.Exec(query, newBalance, userID)
+	if err != nil {
+		return fmt.Errorf("failed to update wallet balance: %w", err)
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf("wallet not found for user_id: %s", userID)
+	}
+
+	return nil
+}
