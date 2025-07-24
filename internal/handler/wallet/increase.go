@@ -22,8 +22,9 @@ func (db *Api) HandleIncreaseWallet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println("user is increasing wallet", increaseModel)
-	errOnDB := db.DB.IncreaseWallet(increaseModel, *userID)
+	errOnDB := db.DB.IncreaseWallet(increaseModel.Balance, *userID)
 	if errOnDB != nil {
+		fmt.Println(errOnDB)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}

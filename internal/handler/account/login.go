@@ -23,13 +23,7 @@ type ErrorResponse struct {
 	ErrorCode int    `json:"errorCode"`
 }
 
-func (db *Api) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	// Ensure the request method is POST
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
-
+func (db *Account) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Decode the JSON body into a LoginRequest struct
 	var loginReq LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&loginReq)
@@ -40,7 +34,6 @@ func (db *Api) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Validate the credentials
 	userOnDB, errDB := db.DB.FetchUserByUsername(loginReq.Username)
-	// userOnDB, error := dbUser.FetchUserByUsername(loginReq.Username)
 	if userOnDB == nil || errDB != nil {
 		fmt.Println("user is not valid ", loginReq)
 		http.Error(w, "Invalid data", http.StatusUnauthorized)

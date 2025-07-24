@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func (db *Api) HandleDeleteItem(w http.ResponseWriter, r *http.Request) {
+func (db *Basket) DeleteItemHandle(w http.ResponseWriter, r *http.Request) {
 	userID, errorUsername := token.FetchUserIDFromToken(r)
 	if userID == nil || errorUsername != nil {
 		http.Error(w, "User name is not valid", http.StatusConflict)

@@ -1,0 +1,22 @@
+package basket
+
+import (
+	"encoding/json"
+	token "myproject/internal/auth"
+	"net/http"
+)
+
+func (db *Basket) WalletItemsHandler(w http.ResponseWriter, r *http.Request) {
+	userID, errorUsername := token.FetchUserIDFromToken(r)
+	if userID == nil || errorUsername != nil {
+		http.Error(w, "User name is not valid", http.StatusConflict)
+		return
+	}
+	items, err := db.DB.FetchBasketByUserID(*userID)
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusConflict)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(items)
+}

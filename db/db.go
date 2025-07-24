@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	constant "myproject/internal/constant"
+	"myproject/internal/constant"
 
 	_ "github.com/lib/pq" // PostgreSQL driver
 )

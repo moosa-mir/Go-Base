@@ -1,8 +1,8 @@
 package model
 
 type IncreaseWalletModel struct {
-	Amount int `json:"amount"`
+	Balance float32 `json:"balance"`
 }
 type WalletModel struct {
-	Amount int `json:"amount"`
+	Balance float32 `json:"balance"`
 }

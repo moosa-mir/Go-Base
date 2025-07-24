@@ -1,22 +1,13 @@
 package basket
 
 import (
-	"encoding/json"
-	token "myproject/internal/auth"
-	"net/http"
+	"myproject/db"
 )
 
-func (db *Api) HandleWalletItems(w http.ResponseWriter, r *http.Request) {
-	userID, errorUsername := token.FetchUserIDFromToken(r)
-	if userID == nil || errorUsername != nil {
-		http.Error(w, "User name is not valid", http.StatusConflict)
-		return
-	}
-	items, err := db.DB.FetchBasketByUserID(*userID)
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusConflict)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(items)
+type Basket struct {
+	DB *db.DB
+}
+
+func NewBasket(db *db.DB) *Basket {
+	return &Basket{DB: db}
 }

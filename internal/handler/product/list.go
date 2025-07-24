@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (db *Api) HandleProductList(w http.ResponseWriter, r *http.Request) {
+func (db *Api) ProductListHandler(w http.ResponseWriter, r *http.Request) {
 	keyword := utils.GetQueryParam(r, "keyword")
 	if keyword == "" {
 		products, error := db.DB.FetchProducts()

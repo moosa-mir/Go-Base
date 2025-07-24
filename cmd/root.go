@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"myproject/internal/db"
+	"myproject/db"
 	registerRoute "myproject/internal/route"
 
 	"github.com/spf13/cobra"

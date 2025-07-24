@@ -1,6 +1,8 @@
-package wallet
+package product
 
-import "myproject/internal/db"
+import (
+	"myproject/db"
+)
 
 type Api struct {
 	DB *db.DB

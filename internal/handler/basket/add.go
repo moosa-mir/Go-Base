@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func (db *Api) HandleAddItem(w http.ResponseWriter, r *http.Request) {
+func (db *Basket) AddItemHandler(w http.ResponseWriter, r *http.Request) {
 	userID, errorUserID := token.FetchUserIDFromToken(r)
 	if userID == nil || errorUserID != nil {
 		http.Error(w, "User name is not valid", http.StatusConflict)

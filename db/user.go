@@ -30,7 +30,7 @@ func (db *DB) FetchUserByUserID(userID uuid.UUID) (*user.StoredUser, error) {
 }
 
 func (db *DB) FetchUserByUsername(username string) (*user.StoredUser, error) {
-	query := `SELECT id, username, name, family, birthday, city, country, phone FROM users WHERE id = $1`
+	query := `SELECT id, username, name, family, birthday, city, country, phone FROM users WHERE username = $1`
 	row := db.QueryRow(query, username)
 
 	var model user.StoredUser

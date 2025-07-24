@@ -1,29 +1,13 @@
 package wallet
 
 import (
-	"encoding/json"
-	"myproject/internal/auth"
-	"myproject/internal/model"
-	"net/http"
+	"myproject/db"
 )
 
-func (db *Api) HandleWallet(w http.ResponseWriter, r *http.Request) {
-	userID, err := auth.FetchUserIDFromToken(r)
-	if err != nil || userID == nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+type Api struct {
+	DB *db.DB
+}
 
-	walletModel, err := db.DB.FetchWalletByUsername(*userID)
-	if err != nil {
-		http.Error(w, "User not found", http.StatusUnauthorized)
-		return
-	}
-
-	if walletModel == nil {
-		_ = json.NewEncoder(w).Encode(model.WalletModel{})
-		return
-	}
-	_ = json.NewEncoder(w).Encode(walletModel)
-	w.WriteHeader(http.StatusOK)
+func ApiHandler(db *db.DB) *Api {
+	return &Api{DB: db}
 }

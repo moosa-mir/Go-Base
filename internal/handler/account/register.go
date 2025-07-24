@@ -7,7 +7,7 @@ import (
 	http "net/http"
 )
 
-func (db *Api) RegisterHandler(w http.ResponseWriter, r *http.Request) {
+func (db *Account) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	// func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	// Ensure the request method is Get
