@@ -8,9 +8,8 @@ import (
 	"github.com/google/uuid"
 	"log"
 	user "myproject/internal/model"
+	"myproject/internal/utils"
 	"time"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 func (db *DB) FetchUserByUserID(userID uuid.UUID) (*user.StoredUser, error) {
@@ -30,11 +29,11 @@ func (db *DB) FetchUserByUserID(userID uuid.UUID) (*user.StoredUser, error) {
 }
 
 func (db *DB) FetchUserByUsername(username string) (*user.StoredUser, error) {
-	query := `SELECT id, username, name, family, birthday, city, country, phone FROM users WHERE username = $1`
+	query := `SELECT id, username, password, name, family, birthday, city, country, phone FROM users WHERE username = $1`
 	row := db.QueryRow(query, username)
 
 	var model user.StoredUser
-	if err := row.Scan(&model.ID, &model.Username, &model.Name, &model.Family, &model.Birthday, &model.City, &model.Country, &model.Phone); err != nil {
+	if err := row.Scan(&model.ID, &model.Username, &model.Password, &model.Name, &model.Family, &model.Birthday, &model.City, &model.Country, &model.Phone); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("user with username %s not found", username)
 		}
@@ -48,10 +47,9 @@ func (db *DB) FetchUserByUsername(username string) (*user.StoredUser, error) {
 // InsertUser inserts a new user into the database.
 func (db *DB) InsertUser(user user.RegistrationUser) (bool, error) {
 	// Hash the password before storing it in the database
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		log.Printf("Error hashing password for user %s: %v\n", user.Username, err)
-		return false, err
+	hashedPassword := utils.GetHashPassword(user.Password)
+	if hashedPassword == "" {
+		return false, fmt.Errorf("error hashing password")
 	}
 
 	// Define the SQL query with PostgreSQL placeholders ($1, $2, ...)
@@ -75,7 +73,7 @@ func (db *DB) InsertUser(user user.RegistrationUser) (bool, error) {
 	_, err = statement.ExecContext(
 		ctx,
 		user.Username,
-		string(hashedPassword), // Store the hashed password
+		hashedPassword, // Store the hashed password
 		user.Name,
 		user.Family,
 		user.Birthday,

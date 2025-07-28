@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"log"
 	model "myproject/internal/model"
-	"time"
 )
 
 func (db *DB) FetchBasketByUserID(userID uuid.UUID) ([]model.BasketItem, error) {
@@ -102,23 +101,6 @@ func (db *DB) DeleteFromBasket(productID uuid.UUID, userID uuid.UUID) error {
 	_, err := db.Exec(query, productID, userID)
 	if err != nil {
 		return fmt.Errorf("error deleting item from basket: %w", err)
-	}
-
-	return nil
-}
-
-func (db *DB) MoveItemsToOrders(tx *sql.Tx, userID uuid.UUID, basketItems []model.BasketItem, groupID uuid.UUID) error {
-	query := `
-        INSERT INTO orders (user_id, product_id, status, group_id, create_date, count)
-        VALUES ($1, $2, $3, $4, $5, $6)
-    `
-	createDate := float64(time.Now().Unix())
-
-	for _, item := range basketItems {
-		_, err := tx.Exec(query, userID, item.Product.ID, 1, groupID, createDate, item.Count) // Status = 1 (completed)
-		if err != nil {
-			return fmt.Errorf("failed to insert order: %w", err)
-		}
 	}
 
 	return nil

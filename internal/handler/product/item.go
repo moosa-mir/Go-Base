@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (db *Api) ProductItemHandler(w http.ResponseWriter, r *http.Request) {
+func (db *Product) ProductItemHandler(w http.ResponseWriter, r *http.Request) {
 	productID, errorPath := utils.GetPathString(r, 2)
 	if productID == "" || errorPath != nil {
 		http.Error(w, "Product id is not valid", http.StatusNotFound)

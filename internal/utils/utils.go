@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -53,4 +55,18 @@ func GenerateTimeIntervalFromEpoch() float32 {
 
 	// Convert the duration to seconds and return as a float32
 	return float32(duration.Seconds())
+}
+
+func GetHashPassword(password string) string {
+	// Use a fixed salt (not recommended for security-sensitive applications)
+	fixedSalt := "my-fixed-salt"
+
+	// Combine the password with the fixed salt
+	input := password + fixedSalt
+
+	// Generate a SHA-256 hash
+	hash := sha256.Sum256([]byte(input))
+
+	// Convert the hash to a hexadecimal string
+	return hex.EncodeToString(hash[:])
 }

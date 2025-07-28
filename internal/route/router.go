@@ -7,9 +7,12 @@ import (
 	"myproject/db"
 	"myproject/internal/auth"
 	"myproject/internal/handler/account"
+	"myproject/internal/handler/admin"
 	"myproject/internal/handler/basket"
+	"myproject/internal/handler/order"
 	"myproject/internal/handler/payment"
 	"myproject/internal/handler/product"
+	"myproject/internal/handler/seller"
 	"myproject/internal/handler/wallet"
 	"net/http"
 )
@@ -17,29 +20,42 @@ import (
 // RegisterRoutes registers the login route with the HTTP server
 func RegisterRoutes(db *db.DB) {
 	router := mux.NewRouter()
-	accountApi := account.NewAccount(db)
-	productApi := product.ApiHandler(db)
-	basketApi := basket.NewBasket(db)
-	walletApi := wallet.ApiHandler(db)
-	paymentApi := payment.NewPayment(db)
+	accountDB := account.NewAccount(db)
+	productDB := product.NewProduct(db)
+	basketDB := basket.NewBasket(db)
+	walletDB := wallet.ApiHandler(db)
+	paymentDB := payment.NewPayment(db)
+	adminDB := admin.NewAdmin(db)
+	sellerDB := seller.NewSeller(db)
+	orderDB := order.NewOrder(db)
 
 	// mux.HandleFunc("/login", login.LoginHandler)
-	router.HandleFunc("/login", accountApi.LoginHandler).Methods(http.MethodPost)
-	router.HandleFunc("/register", accountApi.RegisterHandler).Methods(http.MethodPost)
-	router.HandleFunc("/product", productApi.ProductListHandler).Methods(http.MethodGet)
-	router.HandleFunc("/product/{id}", productApi.ProductItemHandler).Methods(http.MethodGet)
+	router.HandleFunc("/login", accountDB.LoginHandler).Methods(http.MethodPost)
+	router.HandleFunc("/register", accountDB.RegisterHandler).Methods(http.MethodPost)
+	router.HandleFunc("/product", productDB.ProductListHandler).Methods(http.MethodGet)
+	router.HandleFunc("/product/{id}", productDB.ProductItemHandler).Methods(http.MethodGet)
 
-	router.HandleFunc("/basket", auth.Middleware(basketApi.WalletItemsHandler)).Methods(http.MethodGet)
-	router.HandleFunc("/basket", auth.Middleware(basketApi.AddItemHandler)).Methods(http.MethodPost)
-	router.HandleFunc("/basket", auth.Middleware(basketApi.DeleteItemHandle)).Methods(http.MethodDelete)
+	router.HandleFunc("/seller/register", sellerDB.RegisterHandler).Methods(http.MethodPost)
 
-	router.HandleFunc("/wallet", auth.Middleware(walletApi.HandleIncreaseWallet)).Methods(http.MethodPost)
-	router.HandleFunc("/wallet", auth.Middleware(walletApi.WalletHandler)).Methods(http.MethodGet)
+	router.HandleFunc("/admin", adminDB.AdminLoginHandler).Methods(http.MethodPost)
 
-	router.HandleFunc("/account", auth.Middleware(accountApi.AccountInfoHandler)).Methods(http.MethodGet)
-	router.HandleFunc("/account", auth.Middleware(accountApi.UpdateHandler)).Methods(http.MethodPatch)
+	router.HandleFunc("/basket", auth.Middleware(basketDB.WalletItemsHandler)).Methods(http.MethodGet)
+	router.HandleFunc("/basket", auth.Middleware(basketDB.AddItemHandler)).Methods(http.MethodPost)
+	router.HandleFunc("/basket", auth.Middleware(basketDB.DeleteItemHandle)).Methods(http.MethodDelete)
 
-	router.HandleFunc("/pay", auth.Middleware(paymentApi.PayHandler)).Methods(http.MethodPost)
+	router.HandleFunc("/wallet", auth.Middleware(walletDB.HandleIncreaseWallet)).Methods(http.MethodPost)
+	router.HandleFunc("/wallet", auth.Middleware(walletDB.WalletHandler)).Methods(http.MethodGet)
+
+	router.HandleFunc("/account", auth.Middleware(accountDB.AccountInfoHandler)).Methods(http.MethodGet)
+	router.HandleFunc("/account", auth.Middleware(accountDB.UpdateHandler)).Methods(http.MethodPatch)
+
+	router.HandleFunc("/pay", auth.Middleware(paymentDB.PayHandler)).Methods(http.MethodPost)
+
+	router.HandleFunc("/payout", auth.Middleware(adminDB.PayoutHandler)).Methods(http.MethodPost)
+
+	router.HandleFunc("/admin/sellers", auth.Middleware(adminDB.SellerListHandler)).Methods(http.MethodGet)
+
+	router.HandleFunc("/order", auth.Middleware(orderDB.ListOrdersHandler)).Methods(http.MethodGet)
 
 	// Start the HTTP server on port 8080
 	fmt.Println("Starting server on :8080...")

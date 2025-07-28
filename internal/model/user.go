@@ -2,6 +2,12 @@ package model
 
 import "github.com/google/uuid"
 
+// Define a struct to represent the login request payload
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 type User struct {
 	Username string  `json:"username"`
 	Name     string  `json:"name"`
@@ -39,6 +45,12 @@ type StoredUser struct {
 	City     city      `json:"city"`
 	Country  country   `json:"country"`
 	Phone    country   `json:"phone"`
+}
+
+type StoredAdmin struct {
+	ID       uuid.UUID `json:"id"`
+	Username string    `json:"username"`
+	Password string    `json:"password"`
 }
 
 type UserStored interface {

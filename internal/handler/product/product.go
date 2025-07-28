@@ -4,10 +4,10 @@ import (
 	"myproject/db"
 )
 
-type Api struct {
+type Product struct {
 	DB *db.DB
 }
 
-func ApiHandler(db *db.DB) *Api {
-	return &Api{DB: db}
+func NewProduct(db *db.DB) *Product {
+	return &Product{DB: db}
 }
