@@ -23,7 +23,3 @@ func (db *DB) FetchAdminByUsername(username string) (*user.StoredAdmin, error) {
 	log.Printf("Fetched admin: %+v\n", model)
 	return &model, nil
 }
-
-func (db *DB) Payout() {
-
-}

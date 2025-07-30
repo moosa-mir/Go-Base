@@ -6,5 +6,17 @@ import (
 )
 
 func PayOutHandler(db *db.DB) {
-	fmt.Println("PayOutHandler")
+	unPayoutOrders, err := db.FetchUnPayoutOrders()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = db.Payout(unPayoutOrders)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println("Payout successfuly done ")
 }

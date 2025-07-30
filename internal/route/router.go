@@ -37,7 +37,7 @@ func RegisterRoutes(db *db.DB) {
 
 	router.HandleFunc("/seller/register", sellerDB.RegisterHandler).Methods(http.MethodPost)
 
-	router.HandleFunc("/admin", adminDB.AdminLoginHandler).Methods(http.MethodPost)
+	router.HandleFunc("/admin/login", adminDB.AdminLoginHandler).Methods(http.MethodPost)
 
 	router.HandleFunc("/basket", auth.Middleware(basketDB.WalletItemsHandler)).Methods(http.MethodGet)
 	router.HandleFunc("/basket", auth.Middleware(basketDB.AddItemHandler)).Methods(http.MethodPost)
@@ -51,9 +51,9 @@ func RegisterRoutes(db *db.DB) {
 
 	router.HandleFunc("/pay", auth.Middleware(paymentDB.PayHandler)).Methods(http.MethodPost)
 
-	router.HandleFunc("/payout", auth.Middleware(adminDB.PayoutHandler)).Methods(http.MethodPost)
-
+	router.HandleFunc("/admin/payout", auth.Middleware(adminDB.PayoutHandler)).Methods(http.MethodGet)
 	router.HandleFunc("/admin/sellers", auth.Middleware(adminDB.SellerListHandler)).Methods(http.MethodGet)
+	router.HandleFunc("/admin/unpayouts", auth.Middleware(adminDB.FetchUnPayoutHandler)).Methods(http.MethodGet)
 
 	router.HandleFunc("/order", auth.Middleware(orderDB.ListOrdersHandler)).Methods(http.MethodGet)
 
