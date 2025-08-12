@@ -5,9 +5,9 @@ import (
 )
 
 type Basket struct {
-	DB *db.DB
+	DB db.BasketDBInterface
 }
 
-func NewBasket(db *db.DB) *Basket {
+func NewBasket(db db.BasketDBInterface) *Basket {
 	return &Basket{DB: db}
 }

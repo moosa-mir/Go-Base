@@ -3,9 +3,9 @@ package seller
 import "myproject/db"
 
 type Seller struct {
-	DB *db.DB
+	DB db.SellerDBInterface
 }
 
-func NewSeller(db *db.DB) *Seller {
+func NewSeller(db db.SellerDBInterface) *Seller {
 	return &Seller{DB: db}
 }

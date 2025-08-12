@@ -5,9 +5,9 @@ import (
 )
 
 type Payment struct {
-	DB *db.DB
+	DB db.PaymentDBInterface
 }
 
-func NewPayment(db *db.DB) *Payment {
+func NewPayment(db db.PaymentDBInterface) *Payment {
 	return &Payment{DB: db}
 }

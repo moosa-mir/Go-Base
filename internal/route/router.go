@@ -18,16 +18,24 @@ import (
 )
 
 // RegisterRoutes registers the login route with the HTTP server
-func RegisterRoutes(db *db.DB) {
+func RegisterRoutes() error {
+	database, err := db.ConnectDB()
+	if err != nil {
+		log.Fatalf("Failed to connect to the database: %v", err)
+		return err
+	}
+	defer database.Close()
+
+	fmt.Println("Registering routes...")
 	router := mux.NewRouter()
-	accountDB := account.NewAccount(db)
-	productDB := product.NewProduct(db)
-	basketDB := basket.NewBasket(db)
-	walletDB := wallet.ApiHandler(db)
-	paymentDB := payment.NewPayment(db)
-	adminDB := admin.NewAdmin(db)
-	sellerDB := seller.NewSeller(db)
-	orderDB := order.NewOrder(db)
+	accountDB := account.NewAccount(database)
+	productDB := product.NewProduct(database)
+	basketDB := basket.NewBasket(database)
+	walletDB := wallet.ApiHandler(database)
+	paymentDB := payment.NewPayment(database)
+	adminDB := admin.NewAdmin(database)
+	sellerDB := seller.NewSeller(database)
+	orderDB := order.NewOrder(database)
 
 	// mux.HandleFunc("/login", login.LoginHandler)
 	router.HandleFunc("/login", accountDB.LoginHandler).Methods(http.MethodPost)
@@ -50,8 +58,7 @@ func RegisterRoutes(db *db.DB) {
 	router.HandleFunc("/account", auth.Middleware(accountDB.UpdateHandler)).Methods(http.MethodPatch)
 
 	router.HandleFunc("/pay", auth.Middleware(paymentDB.PayHandler)).Methods(http.MethodPost)
-
-	router.HandleFunc("/admin/payout", auth.Middleware(adminDB.PayoutHandler)).Methods(http.MethodGet)
+	
 	router.HandleFunc("/admin/sellers", auth.Middleware(adminDB.SellerListHandler)).Methods(http.MethodGet)
 	router.HandleFunc("/admin/unpayouts", auth.Middleware(adminDB.FetchUnPayoutHandler)).Methods(http.MethodGet)
 
@@ -60,4 +67,5 @@ func RegisterRoutes(db *db.DB) {
 	// Start the HTTP server on port 8080
 	fmt.Println("Starting server on :8080...")
 	log.Fatal(http.ListenAndServe(":8080", router))
+	return nil
 }

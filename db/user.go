@@ -7,16 +7,16 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"log"
-	user "myproject/internal/model"
+	model "myproject/internal/model"
 	"myproject/internal/utils"
 	"time"
 )
 
-func (db *DB) FetchUserByUserID(userID uuid.UUID) (*user.StoredUser, error) {
+func (db *DB) FetchUserByUserID(userID uuid.UUID) (*model.StoredUser, error) {
 	query := `SELECT id, username, name, family, birthday, city, country, phone FROM users WHERE id = $1`
 	row := db.QueryRow(query, userID)
 
-	var model user.StoredUser
+	var model model.StoredUser
 	if err := row.Scan(&model.ID, &model.Username, &model.Name, &model.Family, &model.Birthday, &model.City, &model.Country, &model.Phone); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("user with username %s not found", userID)
@@ -28,11 +28,11 @@ func (db *DB) FetchUserByUserID(userID uuid.UUID) (*user.StoredUser, error) {
 	return &model, nil
 }
 
-func (db *DB) FetchUserByUsername(username string) (*user.StoredUser, error) {
+func (db *DB) FetchUserByUsername(username string) (*model.StoredUser, error) {
 	query := `SELECT id, username, password, name, family, birthday, city, country, phone FROM users WHERE username = $1`
 	row := db.QueryRow(query, username)
 
-	var model user.StoredUser
+	var model model.StoredUser
 	if err := row.Scan(&model.ID, &model.Username, &model.Password, &model.Name, &model.Family, &model.Birthday, &model.City, &model.Country, &model.Phone); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("user with username %s not found", username)
@@ -45,14 +45,14 @@ func (db *DB) FetchUserByUsername(username string) (*user.StoredUser, error) {
 }
 
 // InsertUser inserts a new user into the database.
-func (db *DB) InsertUser(user user.RegistrationUser) (bool, error) {
+func (db *DB) InsertUser(user model.RegistrationUser) (bool, error) {
 	// Hash the password before storing it in the database
 	hashedPassword := utils.GetHashPassword(user.Password)
 	if hashedPassword == "" {
 		return false, fmt.Errorf("error hashing password")
 	}
 
-	// Define the SQL query with PostgreSQL placeholders ($1, $2, ...)
+	// Define the SQL query with postgres placeholders ($1, $2, ...)
 	insertSQL := `
         INSERT INTO users (username, password, name, family, birthday, city, country, phone)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -90,7 +90,7 @@ func (db *DB) InsertUser(user user.RegistrationUser) (bool, error) {
 	return true, nil
 }
 
-func (db *DB) UpdateUser(model user.UpdateUser, userID uuid.UUID) (bool, error) {
+func (db *DB) UpdateUser(model model.UpdateUser, userID uuid.UUID) (bool, error) {
 	// Define the SQL query with PostgreSQL placeholders ($1, $2, ...)
 	updateSQL := `
         UPDATE users 

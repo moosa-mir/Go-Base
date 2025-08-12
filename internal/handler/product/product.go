@@ -5,9 +5,9 @@ import (
 )
 
 type Product struct {
-	DB *db.DB
+	DB db.ProductDBInterface
 }
 
-func NewProduct(db *db.DB) *Product {
+func NewProduct(db db.ProductDBInterface) *Product {
 	return &Product{DB: db}
 }

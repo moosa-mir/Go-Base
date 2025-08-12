@@ -5,9 +5,9 @@ import (
 )
 
 type Account struct {
-	DB *db.DB
+	DB db.UserDBInterface
 }
 
-func NewAccount(db *db.DB) *Account {
+func NewAccount(db db.UserDBInterface) *Account {
 	return &Account{DB: db}
 }

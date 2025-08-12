@@ -17,6 +17,7 @@ func (db *Account) AccountInfoHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Error Fetch Username From Token", http.StatusUnauthorized)
 		return
 	}
+
 	user, errorDB := db.DB.FetchUserByUserID(*userID)
 	if errorDB != nil || user == nil {
 		fmt.Println(errorDB)

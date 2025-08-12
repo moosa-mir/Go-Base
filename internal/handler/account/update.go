@@ -10,11 +10,6 @@ import (
 )
 
 func (db *Account) UpdateHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPatch {
-		http.Error(w, "Method not support", http.StatusMethodNotAllowed)
-		return
-	}
-
 	userID, err := token.FetchUserIDFromToken(r)
 	if err != nil || userID == nil {
 		http.Error(w, "Invalid token", http.StatusUnauthorized)

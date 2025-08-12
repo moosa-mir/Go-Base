@@ -3,10 +3,9 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
 	"log"
 	"myproject/internal/constant"
-
-	_ "github.com/lib/pq" // PostgreSQL driver
 )
 
 type DB struct {

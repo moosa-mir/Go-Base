@@ -21,14 +21,12 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Starts the HTTP server",
 	Run: func(cmd *cobra.Command, args []string) {
-		database, err := db.ConnectDB()
+		err := registerRoute.RegisterRoutes()
 		if err != nil {
 			log.Fatalf("Failed to connect to the database: %v", err)
 		}
-		defer database.Close()
 
 		fmt.Println("Registering routes...")
-		registerRoute.RegisterRoutes(database)
 	},
 }
 

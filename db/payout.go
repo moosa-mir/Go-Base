@@ -63,7 +63,7 @@ func (db *DB) FetchUnPayoutOrders() ([]model.OrderItem, error) {
 	return items, nil
 }
 
-// payout updates the seller_status to 1 for all items in the provided OrderItem slice
+// Payout updates the seller_status to 1 for all items in the provided OrderItem slice
 func (db *DB) Payout(orderItems []model.OrderItem) error {
 	// Prepare the SQL query to update seller_status
 	query := "UPDATE orders SET seller_status = 1 WHERE id = $1"

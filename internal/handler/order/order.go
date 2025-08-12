@@ -3,9 +3,9 @@ package order
 import "myproject/db"
 
 type Order struct {
-	DB *db.DB
+	DB db.OrderDBInterface
 }
 
-func NewOrder(db *db.DB) *Order {
+func NewOrder(db db.OrderDBInterface) *Order {
 	return &Order{DB: db}
 }

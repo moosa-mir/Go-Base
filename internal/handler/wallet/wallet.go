@@ -5,9 +5,9 @@ import (
 )
 
 type Api struct {
-	DB *db.DB
+	DB db.WalletDBInterface
 }
 
-func ApiHandler(db *db.DB) *Api {
+func ApiHandler(db db.WalletDBInterface) *Api {
 	return &Api{DB: db}
 }

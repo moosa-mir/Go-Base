@@ -16,7 +16,7 @@ func (db *DB) ProcessPayment(userID uuid.UUID, basketItems []model.BasketItem, t
 	// Rollback the transaction if an error occurs
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			fmt.Println("Transaction rolled back due to error:", err)
 		}
 	}()
