@@ -18,26 +18,18 @@ import (
 )
 
 // RegisterRoutes registers the login route with the HTTP server
-func RegisterRoutes(
-	userDB db.UserDBInterface,
-	adminDB db.AdminDBInterface,
-	basketDB db.BasketDBInterface,
-	orderDB db.OrderDBInterface,
-	paymentDB db.PaymentDBInterface,
-	productDB db.ProductDBInterface,
-	sellerDB db.SellerDBInterface,
-	walletDB db.WalletDBInterface) error {
+func RegisterRoutes(dbProvider *db.DatabaseProvider) error {
 
 	fmt.Println("Registering routes...")
 	router := mux.NewRouter()
-	newAccount := account.NewAccount(userDB)
-	newProduct := product.NewProduct(productDB)
-	newBasket := basket.NewBasket(basketDB)
-	newWallet := wallet.ApiHandler(walletDB)
-	newPayment := payment.NewPayment(paymentDB)
-	newAdmin := admin.NewAdmin(adminDB)
-	newSeller := seller.NewSeller(sellerDB)
-	newOrder := order.NewOrder(orderDB)
+	newAccount := account.NewAccount(dbProvider.UserDB)
+	newProduct := product.NewProduct(dbProvider.ProductDB)
+	newBasket := basket.NewBasket(dbProvider.BasketDB)
+	newWallet := wallet.ApiHandler(dbProvider.WalletDB)
+	newPayment := payment.NewPayment(dbProvider.PaymentDB)
+	newAdmin := admin.NewAdmin(dbProvider.AdminDB)
+	newSeller := seller.NewSeller(dbProvider.SellerDB)
+	newOrder := order.NewOrder(dbProvider.OrderDB)
 
 	// mux.HandleFunc("/login", login.LoginHandler)
 	router.HandleFunc("/login", newAccount.LoginHandler).Methods(http.MethodPost)

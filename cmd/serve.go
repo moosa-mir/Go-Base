@@ -27,7 +27,8 @@ var serveCmd = &cobra.Command{
 		}
 		defer database.Close()
 
-		err = registerRoute.RegisterRoutes(database, database, database, database, database, database, database, database)
+		dbProvider := db.NewDatabaseProvider(database)
+		err = registerRoute.RegisterRoutes(dbProvider)
 		if err != nil {
 			log.Fatalf("Failed to connect to the database: %v", err)
 		}
@@ -46,6 +47,7 @@ var payOutCmd = &cobra.Command{
 		}
 		defer database.Close()
 
-		payout.PayOutHandler(database)
+		dbProvider := db.NewDatabaseProvider(database)
+		payout.PayOutHandler(dbProvider)
 	},
 }

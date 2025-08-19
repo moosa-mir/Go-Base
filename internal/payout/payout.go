@@ -5,14 +5,14 @@ import (
 	"myproject/db"
 )
 
-func PayOutHandler(db *db.DB) {
-	unPayoutOrders, err := db.FetchUnPayoutOrders()
+func PayOutHandler(dbProvider *db.DatabaseProvider) {
+	unPayoutOrders, err := dbProvider.AdminDB.FetchUnPayoutOrders()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	err = db.Payout(unPayoutOrders)
+	err = dbProvider.PayoutDB.Payout(unPayoutOrders)
 	if err != nil {
 		fmt.Println(err)
 		return
