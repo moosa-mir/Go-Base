@@ -263,3 +263,4 @@ internal/
 This DDD architecture provides a solid foundation for building a maintainable, scalable, and business-focused application.
 
 
+
